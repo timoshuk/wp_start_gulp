@@ -22,6 +22,7 @@ var svgstore = require("gulp-svgstore");
 
 var paths = {
   html: ["app/*.html"],
+  php: ["app/*.php"],
   scss: ["app/scss/**/*.scss"],
   scripts: ["app/scripts/**/*.js"],
   image: ["app/images/**/*.+(png|jpg|jpeg|gif|svg|JPG)"],
@@ -42,12 +43,25 @@ gulp.task("html", function() {
       })
     );
 }); //Html task
+
+gulp.task("php", function() {
+  return gulp
+    .src(paths.php)
+    .pipe(wait(500))
+    .pipe(plumber())
+    .pipe(
+      browserSync.reload({
+        stream: true
+      })
+    );
+}); //php task
+
 gulp.task("css", function() {
   return gulp
     .src(paths.scss) // Gets all files ending with .scss in app/scss
     .pipe(wait(500))
-    .pipe(plumber())
     .pipe(sass())
+    .pipe(plumber())
     .pipe(sourcemaps.init())
     .pipe(postcss([autoprefixer()]))
     .pipe(sourcemaps.write("."))
@@ -151,7 +165,8 @@ gulp.task("browserSync", function() {
     server: {
       baseDir: "app"
     },
-    port: 8080,
+    // port: 8080,
+    proxy: "localhost/vtpp/news/",
     open: true,
     notify: false
   });
@@ -177,17 +192,19 @@ gulp.task(
     "images",
     "fonts",
     "video",
-    "minhtml"
+    "minhtml",
+    "php"
   )
 ); //build
 
 gulp.task("watch", function() {
   gulp.watch(paths.scss, gulp.parallel("css"));
   gulp.watch(paths.html, gulp.parallel("html"));
+  gulp.watch(paths.php, gulp.parallel("php"));
   gulp.watch(paths.scripts, gulp.parallel("js"));
 }); // Gulp watch tack
 
 gulp.task(
   "default",
-  gulp.parallel("watch", "js", "css", "html", "browserSync")
+  gulp.parallel("watch", "js", "css", "html", "php", "browserSync")
 ); // default
