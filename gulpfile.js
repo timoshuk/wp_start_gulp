@@ -26,6 +26,7 @@ var paths = {
   scss: ["app/scss/**/*.scss"],
   scripts: ["app/scripts/**/*.js"],
   image: ["app/images/**/*.+(png|jpg|jpeg|gif|svg|JPG)"],
+  mainimage: ["app/*.+(png|jpg|jpeg|gif|svg|JPG)"],
   fonts: ["app/fonts/**/*"],
   video: ["app/video/**/*"]
 };
@@ -60,6 +61,13 @@ gulp.task("phpdest", function() {
   return gulp.src(paths.php).pipe(gulp.dest("dist"));
 }); // php
 
+gulp.task("mainimage", function() {
+  return gulp.src(paths.mainimage).pipe(gulp.dest("dist"));
+}); // mainimage
+
+gulp.task("maincss", function() {
+  return gulp.src("app/*.css").pipe(gulp.dest("dist"));
+}); // maincss
 gulp.task("css", function() {
   return gulp
     .src(paths.scss) // Gets all files ending with .scss in app/scss
@@ -192,8 +200,10 @@ gulp.task(
   gulp.series(
     "clean:dist",
     "css",
+    "maincss",
     "useref",
     "images",
+    "mainimage",
     "fonts",
     "video",
     "minhtml",
