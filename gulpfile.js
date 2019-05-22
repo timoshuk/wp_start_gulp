@@ -56,6 +56,10 @@ gulp.task("php", function() {
     );
 }); //php task
 
+gulp.task("phpdest", function() {
+  return gulp.src(paths.php).pipe(gulp.dest("dist"));
+}); // php
+
 gulp.task("css", function() {
   return gulp
     .src(paths.scss) // Gets all files ending with .scss in app/scss
@@ -162,13 +166,13 @@ gulp.task("clean:dist", function() {
 
 gulp.task("browserSync", function() {
   browserSync.init({
-    server: {
-      baseDir: "app"
-    },
+    // server: {
+    //   baseDir: "app"
+    // },
     // port: 8080,
     proxy: "localhost/vtpp/news/",
     open: true,
-    notify: false
+    notify: true
   });
 }); //browserSync
 
@@ -193,7 +197,7 @@ gulp.task(
     "fonts",
     "video",
     "minhtml",
-    "php"
+    "phpdest"
   )
 ); //build
 
