@@ -1,0 +1,4 @@
+ncu
+ncu -a
+npm i
+npm update -g // update global modules
