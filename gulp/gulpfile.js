@@ -4,20 +4,14 @@ var setup = {
 
 var gulp = require("gulp");
 var sass = require("gulp-sass"); //Sass to css
-var useref = require("gulp-useref"); // combine js, css files
 var browserSync = require("browser-sync").create(); //browser-sync reload browser
-var uglify = require("gulp-uglify");
-var gulpIf = require("gulp-if");
-var cssnano = require("gulp-cssnano"); // min css
 var imagemin = require("gulp-imagemin"); // min image
 var cache = require("gulp-cache");
 var del = require("del"); // clear project files
-var runSequence = require("run-sequence");
 var notify = require("gulp-notify");
 var postcss = require("gulp-postcss");
 var sourcemaps = require("gulp-sourcemaps");
 var autoprefixer = require("autoprefixer");
-var htmlmin = require("gulp-htmlmin");
 var babel = require("gulp-babel");
 var plumber = require("gulp-plumber");
 var wait = require("gulp-wait");
@@ -25,7 +19,6 @@ var webp = require("gulp-webp");
 var svgstore = require("gulp-svgstore");
 
 var paths = {
-  html: ["../*.html"],
   php: ["../*.php"],
   scss: ["../scss/**/*.scss"],
   scripts: ["../scripts/**/*.js"],
@@ -34,19 +27,9 @@ var paths = {
   video: ["../assets/video/**/*"]
 };
 
-//Tasks
 
-gulp.task("html", function () {
-  return gulp
-    .src(paths.html)
-    .pipe(wait(500))
-    .pipe(plumber())
-    .pipe(
-      browserSync.reload({
-        stream: true
-      })
-    );
-}); //Html task
+
+
 gulp.task("css", function () {
   return gulp
     .src(paths.scss) // Gets all files ending with .scss in app/scss
@@ -83,17 +66,6 @@ gulp.task("js", function () {
     );
 });
 
-gulp.task("useref", function () {
-  return (
-    gulp
-      .src(paths.html)
-      .pipe(useref())
-      .pipe(gulpIf("*.js", uglify()))
-      // Minifies only if it's a CSS file
-      .pipe(gulpIf("*.css", cssnano()))
-      .pipe(gulp.dest("dist"))
-  );
-});
 
 gulp.task("images", function () {
   return (
@@ -153,52 +125,38 @@ gulp.task("clean:dist", function () {
 
 gulp.task("browserSync", function () {
   browserSync.init({
-    server: {
-      baseDir: "../"
-    },
+
     proxy: {
       target: setup.proxyHost
     },
-    // port: 8080,
+    port: 8080,
     open: true,
-    // notify: false
+    //notify: false
   });
 }); //browserSync
 
-gulp.task("minhtml", function () {
-  return gulp
-    .src("dist/**/*.html")
-    .pipe(
-      htmlmin({
-        collapseWhitespace: true
-      })
-    )
-    .pipe(gulp.dest("dist"));
-});
 
 gulp.task(
   "build",
   gulp.series(
     "clean:dist",
     "css",
-    "useref",
     "images",
     "fonts",
-    "video",
-    "minhtml"
+    "video"
+
   )
 ); //build
 
 gulp.task("watch", function () {
   gulp.watch(paths.scss, gulp.parallel("css"));
-  gulp.watch(paths.html, gulp.parallel("html"));
   gulp.watch(paths.scripts, gulp.parallel("js"));
-  gulp.watch(paths.php, gulp.parallel(browserSync.reload({
+  gulp.watch(paths.php, browserSync.reload({
     stream: true
-  })));
+  }));
 }); // Gulp watch tack
 
 gulp.task(
   "default",
-  gulp.parallel("watch", "js", "css", "html", "browserSync")
+  gulp.parallel("watch", "js", "css", "browserSync")
 ); // default
