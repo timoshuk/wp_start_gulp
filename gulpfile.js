@@ -18,7 +18,11 @@ let browsersync = false;
 const php = { src: dir.src + "template/**/*.php", build: dir.build };
 // copy PHP files
 const phpTask = () => {
-  return gulp.src(php.src).pipe(newer(php.build)).pipe(gulp.dest(php.build));
+  return gulp
+    .src(php.src)
+    .pipe(newer(php.build))
+    .pipe(gulp.dest(php.build))
+    .pipe(browsersync.reload({ stream: true }));
 };
 
 exports.phpTask = phpTask;
@@ -53,13 +57,14 @@ const css = {
       basePath: dir.build,
       baseUrl: "/wp-content/themes/wptheme/",
     }),
-    require("autoprefixer")({ browsers: ["last 2 versions", "> 2%"] }),
+    require("autoprefixer"),
     require("css-mqpacker"),
     require("cssnano"),
   ],
 };
 // CSS processing
 const cssTask = () => {
+  gulp.parallel(imagesTask);
   return gulp
     .src(css.src)
     .pipe(sass(css.sassOpts))
@@ -90,9 +95,11 @@ const jsTask = () => {
 
 exports.jsTask = jsTask;
 
-exports.build = () => {
-  gulp.series(php, css, js);
+const build = () => {
+  gulp.series(phpTask, cssTask, jsTask);
 };
+
+exports.build = build;
 
 // Browsersync options
 const syncOpts = {
@@ -113,6 +120,17 @@ const browsersyncTask = () => {
 
 exports.browsersyncTask = browsersyncTask;
 
-// watch for file changes gulp.task('watch', ['browsersync'], () => { // page changes gulp.watch(php.src, ['php'], browsersync ? browsersync.reload : {}); // image changes gulp.watch(images.src, ['images']); // CSS changes gulp.watch(css.watch, ['css']); // JavaScript main changes gulp.watch(js.src, ['js']); });
-
-// default task gulp.task('default', ['build', 'watch']);
+// watch for file changes
+const watchTask = () => {
+  // page changes
+  gulp.watch(php.src, gulp.parallel(phpTask));
+  // image changes
+  gulp.watch(images.src, gulp.parallel(imagesTask));
+  // CSS changes
+  gulp.watch(css.watch, gulp.parallel(cssTask));
+  // JavaScript main changes
+  gulp.watch(js.src, gulp.parallel(jsTask));
+};
+exports.watchTask = watchTask;
+// default task
+exports.default = gulp.parallel(build, watchTask);
