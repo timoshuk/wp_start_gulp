@@ -13,7 +13,7 @@ const concat = require("gulp-concat");
 const stripdebug = require("gulp-strip-debug");
 const uglify = require("gulp-uglify");
 // Browser-sync
-let browsersync = false;
+let browsersync = require("browser-sync").create();
 // PHP settings
 const php = { src: dir.src + "template/**/*.php", build: dir.build };
 // copy PHP files
@@ -101,21 +101,13 @@ const build = () => {
 
 exports.build = build;
 
-// Browsersync options
-const syncOpts = {
-  proxy: "localhost",
-  files: dir.build + "**/*",
-  open: false,
-  notify: false,
-  ghostMode: false,
-  ui: { port: 8001 },
-};
 // browser-sync
 const browsersyncTask = () => {
-  if (browsersync === false) {
-    browsersync = require("browser-sync").create();
-    browsersync.init(syncOpts);
-  }
+  browserSync.init({
+    proxy: "localhost/woo-test",
+    files: dir.build + "**/*",
+    open: true,
+  });
 };
 
 exports.browsersyncTask = browsersyncTask;
